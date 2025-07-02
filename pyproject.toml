@@ -17,7 +17,6 @@ dependencies = [
     "torchaudio>=2.7.0",
     "transformers>=4.53.0",
     "diffusers>=0.34.0",
-    "resemble-perth==1.0.1",
     "omegaconf==2.3.0",
     "conformer",
     "safetensors",
@@ -26,7 +25,7 @@ dependencies = [
     "lxml",
     "pip",
     "nemo_text_processing",
-    "chatterbox-tts@git+https://github.com/rsxdalv/chatterbox.git@fast",
+    "peft>=0.15.2",
 ]
 
 # [build-system]
