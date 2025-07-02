@@ -1,0 +1,37 @@
+[project]
+name = "text2audiobook"
+version = "0.1.0"
+description = "Open Source TTS using Chatterbox"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {file = "LICENSE"}
+authors = [
+    {name = "none", email = "none@none.com"}
+]
+dependencies = [
+    "numpy",
+    "resampy==0.4.3",
+    "librosa==0.11.0",
+    "s3tokenizer==0.1.7",
+    "torch>=2.7.0",
+    "torchaudio>=2.7.0",
+    "transformers>=4.53.0",
+    "diffusers>=0.34.0",
+    "resemble-perth==1.0.1",
+    "omegaconf==2.3.0",
+    "conformer",
+    "safetensors",
+    "beautifulsoup4",
+    "ebooklib",
+    "lxml",
+    "pip",
+    "nemo_text_processing",
+    "chatterbox-tts@git+https://github.com/rsxdalv/chatterbox.git@fast",
+]
+
+# [build-system]
+# requires = ["setuptools>=61.0"]
+# build-backend = "setuptools.build_meta"
+
+# [tool.setuptools.packages.find]
+# where = ["src"]
