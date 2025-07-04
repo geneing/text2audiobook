@@ -240,8 +240,12 @@ class ChatterboxTTS:
             ).to(device=self.device)
 
         # Norm and tokenize text
-        text = punc_norm(text)
-        text_tokens = self.tokenizer.text_to_tokens(text).to(self.device)
+        if isinstance(text, str):
+            text = punc_norm(text)
+            text_tokens = self.tokenizer.text_to_tokens(text).to(self.device)
+        else:
+            text_tokens = [self.tokenizer.text_to_tokens(punc_norm(t)).to(self.device) for t in text]
+            print(len(text_tokens), text_tokens[0].shape)
 
         if cfg_weight > 0.0:
             text_tokens = torch.cat([text_tokens, text_tokens], dim=0)  # Need two seqs for CFG

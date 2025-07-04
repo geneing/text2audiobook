@@ -1,5 +1,5 @@
 import os
-
+import torchaudio
 #import text_preprocess from src subdirectory
 from src.text_preprocess import TextProcessor
 from src.text_to_speech import TextToSpeech
@@ -16,4 +16,6 @@ print(normalized_list)
 tts = TextToSpeech()
 wav = tts.generate_speech(normalized_list[0], audio_prompt_path="1.wav")
 
-print(next(wav).shape)
+print(wav.shape)
+
+torchaudio.save("output.wav", wav, 24000)

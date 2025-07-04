@@ -2,6 +2,20 @@ from src.chatterbox.tts import ChatterboxTTS
 import torch
 from typing import Optional
 
+def _t3_to(model: "ChatterboxTTS", dtype):
+    model.t3.to(dtype=dtype)
+    model.t3.cond_enc.spkr_enc.to(dtype=dtype)
+    model.conds.t3.to(dtype=dtype)
+    return model
+
+def _compile_t3(model: ChatterboxTTS):
+    model.t3._step_compilation_target_original = model.t3._step_compilation_target
+    model.t3._step_compilation_target = torch.compile(model.t3._step_compilation_target, fullgraph=True, backend="cudagraphs")
+    return model
+
+def _remove_t3_compilation(model: ChatterboxTTS):
+    model.t3._step_compilation_target = model.t3._step_compilation_target_original
+    return model
 
 class TextToSpeech:
     """
@@ -27,8 +41,11 @@ class TextToSpeech:
             self.device = device
         print(f"Using device: {self.device}")
         self.model = ChatterboxTTS.from_pretrained(device=self.device)
+        #ei debug
+        # _t3_to(self.model, torch.bfloat16)
+        # self.model = _compile_t3(self.model)
 
-    def generate_speech(self, text: str, audio_prompt_path: Optional[str] = None):
+    def generate_speech(self, text: str | list[str], audio_prompt_path: Optional[str] = None):
         """
         Generates speech from the given text.
 
@@ -39,4 +56,13 @@ class TextToSpeech:
         Returns:
             torch.Tensor: The generated audio waveform.
         """
-        return self.model.generate(text, audio_prompt_path=audio_prompt_path)
+        with torch.no_grad():
+            chunk_generator = self.model.generate(text, audio_prompt_path=audio_prompt_path)
+            out = torch.cat(list(chunk_generator)).detach().cpu()
+            # print(next(chunk_generator).shape)
+
+
+
+        torch.cuda.synchronize()
+        return out
+
