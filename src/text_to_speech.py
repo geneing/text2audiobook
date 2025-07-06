@@ -42,10 +42,20 @@ class TextToSpeech:
         print(f"Using device: {self.device}")
         self.model = ChatterboxTTS.from_pretrained(device=self.device)
         #ei debug
-        # _t3_to(self.model, torch.bfloat16)
-        # self.model = _compile_t3(self.model)
+        _t3_to(self.model, torch.bfloat16)
+        self.model = _compile_t3(self.model)
 
-    def generate_speech(self, text: str | list[str], audio_prompt_path: Optional[str] = None):
+    def prepare_conditionals(self, audio_prompt_path: str, exaggeration:float=0.5):
+        """
+        Prepares the conditionals for the TTS model.
+
+        Args:
+            audio_prompt_path (str): Path to an audio file to use as a voice prompt.
+        """
+        self.model.prepare_conditionals(audio_prompt_path, exaggeration)
+
+    def generate_speech(self, text: str | list[str], audio_prompt_path: Optional[str] = None, exaggeration: float = 0.5,
+        cfg_weight: float =0.5, temperature: float =0.8,):
         """
         Generates speech from the given text.
 
@@ -57,7 +67,7 @@ class TextToSpeech:
             torch.Tensor: The generated audio waveform.
         """
         with torch.no_grad():
-            chunk_generator = self.model.generate(text, audio_prompt_path=audio_prompt_path)
+            chunk_generator = self.model.generate(text, audio_prompt_path=audio_prompt_path, exaggeration=exaggeration, cfg_weight=cfg_weight, temperature=temperature)
             out = torch.cat(list(chunk_generator)).detach().cpu()
             # print(next(chunk_generator).shape)
 

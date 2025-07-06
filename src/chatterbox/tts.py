@@ -243,9 +243,12 @@ class ChatterboxTTS:
         if isinstance(text, str):
             text = punc_norm(text)
             text_tokens = self.tokenizer.text_to_tokens(text).to(self.device)
-        else:
-            text_tokens = [self.tokenizer.text_to_tokens(punc_norm(t)).to(self.device) for t in text]
+        else: # text is a list of strings. Doesn't work yet
+            text_tokens = [self.tokenizer.text_to_tokens(punc_norm(t)).squeeze(0).to(self.device) for t in text]
             print(len(text_tokens), text_tokens[0].shape)
+            text_tokens = torch.nn.utils.rnn.pad_sequence(text_tokens, batch_first=True)
+            assert False, "not implemented"
+
 
         if cfg_weight > 0.0:
             text_tokens = torch.cat([text_tokens, text_tokens], dim=0)  # Need two seqs for CFG
@@ -263,6 +266,7 @@ class ChatterboxTTS:
                 temperature=temperature,
                 cfg_weight=cfg_weight,
                 max_cache_len=max_cache_len,
+                repetition_penalty=1.2,
             )
 
             
@@ -295,4 +299,3 @@ class ChatterboxTTS:
                 return torch.from_numpy(watermarked_wav).unsqueeze(0)
 
             yield speech_to_wav(speech_tokens)
-

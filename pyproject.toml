@@ -26,6 +26,7 @@ dependencies = [
     "pip",
     "nemo_text_processing",
     "peft>=0.15.2",
+    "pysbd>=0.3.4",
 ]
 
 # [build-system]
