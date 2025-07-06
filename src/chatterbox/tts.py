@@ -213,6 +213,7 @@ class ChatterboxTTS:
         exaggeration=0.5,
         cfg_weight=0.5,
         temperature=0.8,
+        repetition_penalty=1.0,
         # stream - left for API compatibility
         tokens_per_slice=None,
         remove_milliseconds=None,
@@ -266,7 +267,7 @@ class ChatterboxTTS:
                 temperature=temperature,
                 cfg_weight=cfg_weight,
                 max_cache_len=max_cache_len,
-                repetition_penalty=1.2,
+                repetition_penalty=repetition_penalty,
             )
 
             

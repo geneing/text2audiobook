@@ -55,7 +55,7 @@ class TextToSpeech:
         self.model.prepare_conditionals(audio_prompt_path, exaggeration)
 
     def generate_speech(self, text: str | list[str], audio_prompt_path: Optional[str] = None, exaggeration: float = 0.5,
-        cfg_weight: float =0.5, temperature: float =0.8,):
+        cfg_weight: float =0.5, temperature: float =0.8, repetition_penalty: float =1.0):
         """
         Generates speech from the given text.
 
@@ -67,7 +67,8 @@ class TextToSpeech:
             torch.Tensor: The generated audio waveform.
         """
         with torch.no_grad():
-            chunk_generator = self.model.generate(text, audio_prompt_path=audio_prompt_path, exaggeration=exaggeration, cfg_weight=cfg_weight, temperature=temperature)
+            chunk_generator = self.model.generate(text, audio_prompt_path=audio_prompt_path, 
+                exaggeration=exaggeration, cfg_weight=cfg_weight, temperature=temperature, repetition_penalty=repetition_penalty)
             out = torch.cat(list(chunk_generator)).detach().cpu()
             # print(next(chunk_generator).shape)
 

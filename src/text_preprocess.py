@@ -1,5 +1,6 @@
 import os
 import logging
+import re
 
 from nemo_text_processing.text_normalization.normalize import Normalizer
 import pysbd
@@ -107,6 +108,21 @@ class TextProcessor:
         # assert len(chunks_sans_whitespace) == len(original_sans_whitespace), "Content might be lost during splitting"
         
         return chunks
+
+    def paragraph_splitter(self, text: str) -> list[str]:
+        """
+        Splits text into paragraphs based on one or more empty lines.
+
+        Args:
+            text (str): The input text to split.
+
+        Returns:
+            list[str]: A list of paragraphs.
+        """
+        # Use regex to split by one or more empty lines, then clean up whitespace
+        paragraphs = re.split(r'\n\s*\n', text)
+        # Filter out any empty strings that may result from the split
+        return [p.strip() for p in paragraphs if p.strip()]
 
     def split_long_sentence(self, sentence: str, max_chars: int) -> list[str]:
         """
