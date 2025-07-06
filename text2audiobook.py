@@ -20,12 +20,13 @@ with open(os.path.join(os.path.dirname(__file__), fname), 'r', encoding='utf-8')
 paragraphs = processor.paragraph_splitter(text)
 for idx, paragraph in enumerate(paragraphs):
     # Split each paragraph into manageable chunks for the TTS
-    chunks = processor.sentence_splitter(paragraph, max_chars=800)
+    chunks = processor.sentence_splitter(paragraph, max_chars=400)
     normalized_list = processor.normalize(chunks)
 
     wavout = []
     for i, txt in enumerate(normalized_list):
         wav = tts.generate_speech(txt, exaggeration=.5, cfg_weight=0.5, temperature=1., repetition_penalty=1.0)
+        diff = tts.check_tts(txt, wav)
         # print(f"{wav.shape} {type(wav)}")
         wavout.append(wav)
     wavout=torch.hstack(wavout)

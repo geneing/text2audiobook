@@ -1,6 +1,14 @@
 from src.chatterbox.tts import ChatterboxTTS
 import torch
+import torchaudio
+
 from typing import Optional
+import whisper
+import difflib
+import re
+import string
+import traceback as tb
+from whisper.normalizers import EnglishTextNormalizer
 
 def _t3_to(model: "ChatterboxTTS", dtype):
     model.t3.to(dtype=dtype)
@@ -44,6 +52,10 @@ class TextToSpeech:
         #ei debug
         _t3_to(self.model, torch.bfloat16)
         self.model = _compile_t3(self.model)
+        self.stt_model = whisper.load_model("base.en", device=self.device)
+        self.stt_options = whisper.DecodingOptions(language="en", without_timestamps=True)
+        self.resampler = torchaudio.transforms.Resample(24_000, 16_000)
+        self.normalizer = EnglishTextNormalizer()
 
     def prepare_conditionals(self, audio_prompt_path: str, exaggeration:float=0.5):
         """
@@ -71,9 +83,34 @@ class TextToSpeech:
                 exaggeration=exaggeration, cfg_weight=cfg_weight, temperature=temperature, repetition_penalty=repetition_penalty)
             out = torch.cat(list(chunk_generator)).detach().cpu()
             # print(next(chunk_generator).shape)
-
-
-
         torch.cuda.synchronize()
         return out
+
+    def check_tts(self, target_text: str, wav: torch.Tensor):
+
+        def normalize_for_compare_all_punct(text):
+            text = re.sub(r'[–—-]', ' ', text)
+            text = re.sub(rf"[{re.escape(string.punctuation)}]", '', text)
+            text = re.sub(r'\s+', ' ', text)
+            return text.lower().strip()
+
+        try:
+            audio = self.resampler(wav)
+            audio = whisper.pad_or_trim(audio)
+            mel = whisper.log_mel_spectrogram(audio.squeeze(0).to(self.device))
+            result = self.stt_model.decode(mel, self.stt_options)
+            transcribed = self.normalizer(result.text.strip().lower())
+            target_text = self.normalizer(target_text.strip().lower())
+            # print(f"\033[32m[DEBUG] Whisper transcription: '\033[33m{transcribed}'\033[0m")
+            score = difflib.SequenceMatcher(
+                None,
+                normalize_for_compare_all_punct(transcribed),
+                normalize_for_compare_all_punct(target_text)
+            ).ratio()
+            # print(f"\033[32m[DEBUG] Score: {score:.3f} (target: '\033[33m{target_text}')\033[0m")
+            return (score)
+        except Exception as e:
+            tb.print_exc()
+            print(f"[ERROR] Whisper transcription failed for {target_text}: {e}")
+            return (0.0)
 
