@@ -99,6 +99,7 @@ class TextToSpeech:
             audio = whisper.pad_or_trim(audio)
             mel = whisper.log_mel_spectrogram(audio.squeeze(0).to(self.device))
             result = self.stt_model.decode(mel, self.stt_options)
+            # print(result)
             transcribed = self.normalizer(result.text.strip().lower())
             target_text = self.normalizer(target_text.strip().lower())
             # print(f"\033[32m[DEBUG] Whisper transcription: '\033[33m{transcribed}'\033[0m")

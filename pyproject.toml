@@ -28,6 +28,7 @@ dependencies = [
     "peft>=0.15.2",
     "pysbd>=0.3.4",
     "openai-whisper>=20250625",
+    "ffmpeg-python>=0.2.0",
 ]
 
 # [build-system]

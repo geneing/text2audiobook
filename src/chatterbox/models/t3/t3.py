@@ -407,7 +407,7 @@ class T3(nn.Module):
             "Cannot process large input when cache already has content"
 
         length_guesstimate = text_tokens.shape[1] * 2
-        print(f"Estimated token count: {length_guesstimate}")
+        # print(f"Estimated token count: {length_guesstimate}")
         length_guesstimate = int(length_guesstimate * 0.8) # variance
 
         cache_position = torch.arange(seq_len, device=inputs_embeds.device)
@@ -420,7 +420,8 @@ class T3(nn.Module):
         )
 
         # ---- Generation Loop using kv_cache ----
-        for i in tqdm(range(max_new_tokens), desc="Sampling", dynamic_ncols=True):
+        # for i in tqdm(range(max_new_tokens), desc="Sampling", dynamic_ncols=True):
+        for i in range(max_new_tokens):
             logits = output_logits[:, -1, :]
 
             # CFG
